@@ -1,0 +1,48 @@
+services:
+  # Node.js Application
+  app:
+    build:
+      context: ./backend
+    container_name: todo-app
+    restart: always
+    volumes:
+      - ./backend/logs:/usr/src/todo_app/logs    # Mount logs folder from host
+    ports:
+      - "3000:3000"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: todo_db
+      POSTGRES_PORT: 5432
+      REDIS_HOST: redis 
+      REDIS_PORT: 6379 
+    depends_on:
+      - db
+      - redis
+
+  # PostgreSQL Database
+  db:
+    image: postgres:14-alpine
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: todo_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # Volume for persisting DB data
+
+  # Redis Cache
+  redis:
+    image: redis:alpine
+    container_name: redis-cache
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+# Volumes for persisting data
+volumes:
+  pgdata:
+  redisdata:
